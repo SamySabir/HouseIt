@@ -323,7 +323,7 @@ export default function CreateListing() {
         // Send request and handle response
         try {
             const axiosClient = axios.create({
-                baseURL: "http://localhost:8080",
+                baseURL: "/api",
             });
             const response = await axiosClient.post('/listing', payload);
             // console.log('Listing created successfully:', response.data);

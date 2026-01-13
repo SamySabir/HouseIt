@@ -106,7 +106,7 @@ export default function ApproveLandlord(props) {
 
         try {
             const axiosClient = axios.create({
-                baseURL: 'http://localhost:8080',
+                baseURL: '/api',
             });
 
             const userResponse = await axiosClient.get(`/users/${email}`);

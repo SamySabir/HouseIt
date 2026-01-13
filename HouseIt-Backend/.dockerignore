@@ -1,0 +1,13 @@
+build/
+.gradle/
+.git/
+.gitignore
+.idea/
+*.iml
+target/
+.DS_Store
+*.log
+node_modules/
+.env
+.env.local
+README.md

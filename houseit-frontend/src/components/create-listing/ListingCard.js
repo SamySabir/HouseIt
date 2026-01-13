@@ -335,7 +335,7 @@ function ListingCard({ listing, onRentOut }) {
 
     try {
       const axiosClient = axios.create({
-        baseURL: "http://localhost:8080",
+        baseURL: "/api",
       });
       const listingResponse = await axiosClient.get(`/listing/${listingID}`);
       if (listingResponse.status === 200) {

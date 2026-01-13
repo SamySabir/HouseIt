@@ -16,7 +16,7 @@ jobs:
         image: postgres:17
         env:
           POSTGRES_DB: house_it
-          POSTGRES_PASSWORD: ECSE428
+          POSTGRES_PASSWORD: HouseIt2024
           POSTGRES_USER: postgres
         ports:
           - 5432:5432
@@ -46,5 +46,5 @@ jobs:
       env:
         SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/house_it
         SPRING_DATASOURCE_USERNAME: postgres
-        SPRING_DATASOURCE_PASSWORD: ECSE428
+        SPRING_DATASOURCE_PASSWORD: HouseIt2024
         

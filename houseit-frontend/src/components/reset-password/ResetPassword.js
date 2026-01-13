@@ -158,7 +158,7 @@ export default function ResetPassword(props) {
 
         try {
             const axiosClient = axios.create({
-                baseURL: "http://localhost:8080",
+                baseURL: "/api",
             });
             const response = await axiosClient.post('/authentication/reset-password', payload);
 

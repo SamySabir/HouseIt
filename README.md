@@ -1,5 +1,5 @@
-# ECSE-428-Fall-2024
-This is a GitHub repository for the semester long group project
+# HouseIt
+A comprehensive housing rental platform
 
 ## Class Diagram
 
@@ -13,10 +13,10 @@ The umple model can be found [here](https://cruise.umple.org/umpleonline/umple.p
 
 - install [postgresql 17](https://www.enterprisedb.com/downloads/postgres-postgresql-downloads) 
     - use port 5432 (if not available, it means you already have postgresql installed)
-    - **IMPORTANT** use password *ECSE428*
+    - **IMPORTANT** use password *HouseIt2024*
     - no need for stack builder
     - after install, launch psql
-        - press enter on every option and enter password *ECSE428*
+        - press enter on every option and enter password *HouseIt2024*
         - execute command `CREATE DATABASE house_it;`
         - execute command `\l` to confirm db was created succesfully
 

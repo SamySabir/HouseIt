@@ -169,7 +169,7 @@ export default function SignUp(props) {
 
     try {
       const axiosClient = axios.create({
-        baseURL: "http://localhost:8080",
+        baseURL: "/api",
       });
       const response = await axiosClient.post('/authentication/signup', payload);
 
