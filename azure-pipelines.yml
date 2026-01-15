@@ -1,0 +1,118 @@
+trigger:
+  - main
+
+pr:
+  - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  # Registry Settings
+  dockerRegistryServiceConnection: 'AcrConnection'
+  imageRepositoryBackend: 'houseit-backend'
+  imageRepositoryFrontend: 'houseit-frontend'
+  containerRegistry: 'calcbckend.azurecr.io'  # Update with your ACR name
+  tag: '$(Build.BuildId)'
+
+  # Database Config for CI Testing
+  SPRING_DATASOURCE_URL: 'jdbc:postgresql://localhost:5432/house_it'
+  SPRING_DATASOURCE_USERNAME: 'postgres'
+  SPRING_DATASOURCE_PASSWORD: 'password'
+
+stages:
+  # ----------------------------
+  # STAGE 1: BACKEND
+  # ----------------------------
+  - stage: Backend
+    displayName: Build and Test Backend
+    jobs:
+      - job: BackendBuild
+        displayName: Test and Push Backend
+        services:
+          postgres:
+            image: postgres:16-alpine
+            env:
+              POSTGRES_DB: house_it
+              POSTGRES_USER: postgres
+              POSTGRES_PASSWORD: password
+            ports:
+              - 5432:5432
+
+        steps:
+          - task: JavaToolInstaller@0
+            inputs:
+              versionSpec: '17'
+              jdkArchitectureOption: 'x64'
+              jdkSourceOption: 'PreInstalled'
+
+          # Make gradlew executable (Essential for Linux runners)
+          - script: chmod +x HouseIt-Backend/gradlew
+            displayName: 'Make gradlew executable'
+
+          - script: |
+              # Wait for PostgreSQL to be ready
+              until pg_isready -h localhost -p 5432 -U postgres; do
+                echo 'waiting for postgres...'
+                sleep 1
+              done
+            displayName: 'Wait for PostgreSQL'
+
+          - task: Gradle@3
+            displayName: 'Run Gradle Tests'
+            inputs:
+              workingDirectory: 'HouseIt-Backend'
+              gradleWrapperFile: 'HouseIt-Backend/gradlew'
+              tasks: 'test'
+              publishJUnitResults: true
+              testResultsFiles: '**/TEST-*.xml'
+              javaHomeOption: 'JDKVersion'
+              jdkVersionOption: '1.17'
+            env:
+              SPRING_DATASOURCE_URL: $(SPRING_DATASOURCE_URL)
+              SPRING_DATASOURCE_USERNAME: $(SPRING_DATASOURCE_USERNAME)
+              SPRING_DATASOURCE_PASSWORD: $(SPRING_DATASOURCE_PASSWORD)
+              SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
+
+          - task: Docker@2
+            displayName: 'Build and Push Backend Image'
+            inputs:
+              containerRegistry: '$(dockerRegistryServiceConnection)'
+              repository: '$(imageRepositoryBackend)'
+              command: 'buildAndPush'
+              Dockerfile: 'HouseIt-Backend/Dockerfile'
+              tags: |
+                $(tag)
+                latest
+
+  # ----------------------------
+  # STAGE 2: FRONTEND
+  # ----------------------------
+  - stage: Frontend
+    displayName: Build Frontend
+    dependsOn: []  # Runs in parallel with Backend
+    jobs:
+      - job: FrontendBuild
+        displayName: Build and Push Frontend
+        steps:
+          - task: NodeTool@0
+            displayName: 'Install Node.js'
+            inputs:
+              versionSpec: '18.x'
+
+          - script: |
+              cd houseit-frontend
+              npm ci --legacy-peer-deps
+              npm run build
+            displayName: 'Install and Build Frontend'
+
+          - task: Docker@2
+            displayName: 'Build and Push Frontend Image'
+            inputs:
+              containerRegistry: '$(dockerRegistryServiceConnection)'
+              repository: '$(imageRepositoryFrontend)'
+              command: 'buildAndPush'
+              Dockerfile: 'houseit-frontend/Dockerfile'
+              tags: |
+                $(tag)
+                latest
