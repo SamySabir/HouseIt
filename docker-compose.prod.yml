@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  postgres-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: house_it
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    restart: always
+
+  backend:
+    image: ${CONTAINER_REGISTRY}/houseit-backend:latest
+    restart: always
+    depends_on:
+      - postgres-db
+    links:
+      - postgres-db
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres-db:5432/house_it"
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${DDL_AUTO}
+      SPRING_SQL_INIT_MODE: never
+      SERVER_PORT: 8080
+    restart: always
+
+  frontend:
+    image: ${CONTAINER_REGISTRY}/houseit-frontend:latest
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: always
+
+volumes:
+  db_data:
